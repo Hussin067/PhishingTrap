@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Boolean, ForeignKey, DateTime, Integer, String , Text
+from sqlalchemy import Boolean, ForeignKey, DateTime, Integer, String , Text , JSON
 from sqlalchemy.orm import relationship , mapped_column , Mapped
 from database.connection import Base
 
@@ -13,6 +13,7 @@ class Employee(Base):
     department: Mapped[str| None] = mapped_column(String(100), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True , nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime , default = datetime.utcnow , nullable=False)
+    password_hash:Mapped[str] = mapped_column(String(255) , nullable=True)
 
     simulations: Mapped[list["Simulation"]] = relationship(
         back_populates="employee"
@@ -67,16 +68,35 @@ class Event(Base):
 
 class Training(Base):
     __tablename__ = "trainings"
-    id: Mapped[int] = mapped_column(Integer , primary_key=True, index=True)
-    employee_id: Mapped[int] = mapped_column(Integer , ForeignKey("employees.id") , nullable=False)
-    simulation_id: Mapped[int] = mapped_column(Integer , ForeignKey("simulations.id") , nullable=False)
-    title: Mapped[str] = mapped_column(String(155) , nullable=False)
-    content: Mapped[str] = mapped_column(Text , nullable=True)
-    completed: Mapped[bool] = mapped_column(Boolean , default=False , nullable=False)
-    completed_at: Mapped[datetime| None] = mapped_column(DateTime , nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime , default = datetime.utcnow , nullable=False)
+
+    id: Mapped[int] = mapped_column(Integer,primary_key=True,index=True)
+    employee_id: Mapped[int] = mapped_column(Integer,ForeignKey("employees.id"),nullable=False)
+    simulation_id: Mapped[int | None] = mapped_column(Integer,ForeignKey("simulations.id"),nullable=True)
+    title: Mapped[str] = mapped_column(String(155),nullable=False)
+    content: Mapped[str | None] = mapped_column(Text,nullable=True)
+    category: Mapped[str] = mapped_column(String(100),nullable=False)
+    difficulty: Mapped[str] = mapped_column(String(50),default="beginner",nullable=False)
+    score: Mapped[int | None] = mapped_column(Integer,nullable=True)
+    completed: Mapped[bool] = mapped_column(Boolean,default=False,nullable=False)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime,nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime,default=datetime.utcnow,nullable=False)
     employee: Mapped["Employee"] = relationship(
         back_populates="trainings")
     simulation: Mapped["Simulation"] = relationship(
         back_populates="trainings")
-    
+    questions: Mapped[list["TrainingQuestion"]] = relationship(
+        back_populates="training"
+)
+
+class TrainingQuestion(Base):
+    __tablename__ = "training_question"
+
+    id: Mapped[int] = mapped_column(Integer , primary_key=True , index=True)
+    training_id:Mapped[int] = mapped_column(Integer , ForeignKey("trainings.id"), nullable=False)
+    question:Mapped[str] = mapped_column(String(500) , nullable=False)
+    options:Mapped[list[str]] = mapped_column(JSON , nullable=False)
+    correct_answer:Mapped[str] = mapped_column(String(1), nullable=False)
+    explanation:Mapped[str] = mapped_column(Text , nullable=False)
+    created_at:Mapped[datetime] = mapped_column(DateTime , default=datetime.utcnow, nullable=False)
+    training: Mapped["Training"] = relationship(
+        back_populates="questions")
