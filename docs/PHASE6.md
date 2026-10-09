@@ -153,4 +153,4 @@ Run scripts with `python -m ...` from the project root; running `python ai/xyz.p
 * Simulation "sent" is a database record; this phase does not deliver real email.
 * Agent decisions are not scheduled automatically; an administrator triggers them.
 * Possible later work: collect real consented data, validate and recalibrate, add admin auth, scheduling, difficulty-specific templates, optional LLM for explanation text only.
-* Housekeeping: `/employees/{id}/risk` (rule-based) still exists beside the new analysis; `main.py` mixes `backend.app` and `app` import roots; the model binary and generated CSV are tracked in git and probably belong in `.gitignore`.
+* Housekeeping: `/employees/{id}/risk` (rule-based) still exists beside the new analysis; `main.py` mixes `backend.app` and `app` import roots; the model binary, its metadata and the feature CSV are generated files and are git-ignored (recreate them with the commands in section 8).
