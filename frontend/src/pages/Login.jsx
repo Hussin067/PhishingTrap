@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Card from "../components/common/Card";
 import Button from "../components/common/Button";
 import { loginEmployee } from "../services/api";
+import { adminLogin, saveAdminSession } from "../services/adminApi";
 import { useNavigate } from "react-router";
 
 const ShieldIcon = ({ className }) => (
@@ -85,8 +86,57 @@ const EyeOffIcon = ({ className }) => (
   </svg>
 );
 
+const UserIcon = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21c.7-4 3.7-6 8-6s7.3 2 8 6" />
+  </svg>
+);
+
+const ROLES = {
+  employee: {
+    title: "Employees",
+    description: "Take your assigned security awareness training and review your results.",
+    heading: "Welcome back",
+    subtitle: "Sign in to access your security awareness training.",
+  },
+  admin: {
+    title: "Administrators",
+    description: "View employee results and weaknesses, and run phishing awareness campaigns.",
+    heading: "Admin sign in",
+    subtitle: "Sign in to open the administration dashboard.",
+  },
+};
+
+const RoleCard = ({ icon, title, description, onSelect }) => (
+  <Card className="!bg-ink-900/85 backdrop-blur-xl border border-white/10 shadow-elevated flex flex-col gap-4 p-6 text-left">
+    <span className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500/20 to-accent-500/20 text-accent-400 ring-1 ring-white/10">
+      {icon}
+    </span>
+    <div>
+      <h2 className="text-xl font-bold text-white font-heading">{title}</h2>
+      <p className="mt-1 text-sm text-ink-300">{description}</p>
+    </div>
+    <Button variant="primary" className="w-full mt-auto" onClick={onSelect}>
+      Sign in
+    </Button>
+  </Card>
+);
+
 const Login = () => {
   const navigate = useNavigate();
+
+  // null = choosing between employee and administrator sign-in
+  const [role, setRole] = useState(null);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -112,6 +162,15 @@ const Login = () => {
     return errors;
   };
 
+  const chooseRole = (nextRole) => {
+    setRole(nextRole);
+    setEmail("");
+    setPassword("");
+    setShowPassword(false);
+    setFieldErrors({});
+    setFormError("");
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -127,6 +186,13 @@ const Login = () => {
     setLoading(true);
 
     try {
+      if (role === "admin") {
+        const session = await adminLogin(email.trim(), password);
+        saveAdminSession(session);
+        navigate("/admin");
+        return;
+      }
+
       const employee = await loginEmployee(email.trim(), password);
 
       console.log("Logged in employee:", employee);
@@ -137,7 +203,11 @@ const Login = () => {
     } catch (err) {
       console.error("Login failed:", err);
 
-      setFormError(err.message || "Invalid email or password.");
+      setFormError(
+        err.status === 503
+          ? "The admin portal is not configured on the server yet. See docs/ADMIN_PORTAL.md."
+          : err.message || "Invalid email or password."
+      );
     } finally {
       setLoading(false);
     }
@@ -170,18 +240,49 @@ const Login = () => {
         </p>
       </div>
 
-      {/* Login Card */}
+      {role === null ? (
+        /* Account type chooser */
+        <div className="relative z-10 w-full max-w-[680px] animate-scale-in">
+          <h2 className="mb-6 text-center text-xl font-bold text-white font-heading">
+            Choose how you want to sign in
+          </h2>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <RoleCard
+              icon={<UserIcon className="w-6 h-6" />}
+              title={ROLES.employee.title}
+              description={ROLES.employee.description}
+              onSelect={() => chooseRole("employee")}
+            />
+            <RoleCard
+              icon={<ShieldIcon className="w-6 h-6" />}
+              title={ROLES.admin.title}
+              description={ROLES.admin.description}
+              onSelect={() => chooseRole("admin")}
+            />
+          </div>
+        </div>
+      ) : (
+      /* Login Card */
       <div className="relative z-10 w-full max-w-[420px] animate-scale-in">
         <Card className="relative overflow-hidden rounded-3xl !bg-ink-900/85 backdrop-blur-xl border border-white/10 shadow-elevated p-6 sm:p-8">
           {/* Subtle top card glow line */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-500 via-accent-400 to-brand-600" />
 
+          <button
+            type="button"
+            onClick={() => chooseRole(null)}
+            disabled={loading}
+            className="mb-4 text-xs font-semibold text-brand-400 hover:text-brand-300 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            ← Choose a different account type
+          </button>
+
           <h2 className="text-2xl font-bold text-white font-heading">
-            Welcome back
+            {ROLES[role].heading}
           </h2>
 
           <p className="mt-1 text-sm text-ink-300">
-            Sign in to access your security awareness training.
+            {ROLES[role].subtitle}
           </p>
 
           {formError && (
@@ -385,6 +486,7 @@ const Login = () => {
           </div>
         </Card>
       </div>
+      )}
 
       <p className="relative z-10 mt-8 text-xs text-ink-400">
         Phishing Trap AI • Enterprise Security Platform

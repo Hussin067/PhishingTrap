@@ -65,7 +65,7 @@ def build_decision(
     )
 
 
-def _create_training(db: Session, employee_id: int, decision: AgentDecision) -> int | None:
+def create_training_for_decision(db: Session, employee_id: int, decision: AgentDecision) -> int | None:
     recommendation = decision.training_recommendation
     if recommendation is None or recommendation.already_assigned:
         return None
@@ -93,6 +93,29 @@ def _create_training(db: Session, employee_id: int, decision: AgentDecision) -> 
             )
         )
     return training.id
+
+
+
+def audit_payload(
+    decision: AgentDecision, approved_by: str, include_synthetic: bool, training_id: int | None
+) -> dict:
+    """What is stored in the audit Event for an executed decision."""
+    recommendation = decision.training_recommendation
+    return {
+        "approved_by": approved_by,
+        "mode": decision.mode,
+        "confidence": decision.confidence,
+        "scenario": decision.proposed_simulation.scenario,
+        "difficulty": decision.proposed_simulation.difficulty,
+        "training_topic": recommendation.topic if recommendation else None,
+        "training_id": training_id,
+        "model_used": decision.model_used,
+        "model_version": decision.model_version,
+        "data_source": "includes_synthetic" if include_synthetic else "real_only",
+        "guardrails_applied": decision.guardrails_applied,
+        "rationale": decision.rationale,
+        "employee_summary": asdict(decision.employee_summary),
+    }
 
 
 def execute_decision(
@@ -140,24 +163,9 @@ def execute_decision(
     db.add(simulation)
     db.flush()
 
-    training_id = _create_training(db, employee_id, decision)
+    training_id = create_training_for_decision(db, employee_id, decision)
 
-    recommendation = decision.training_recommendation
-    audit = {
-        "approved_by": approved_by,
-        "mode": decision.mode,
-        "confidence": decision.confidence,
-        "scenario": proposal.scenario,
-        "difficulty": proposal.difficulty,
-        "training_topic": recommendation.topic if recommendation else None,
-        "training_id": training_id,
-        "model_used": decision.model_used,
-        "model_version": decision.model_version,
-        "data_source": "includes_synthetic" if include_synthetic else "real_only",
-        "guardrails_applied": decision.guardrails_applied,
-        "rationale": decision.rationale,
-        "employee_summary": asdict(decision.employee_summary),
-    }
+    audit = audit_payload(decision, approved_by, include_synthetic, training_id)
     db.add(
         models.Event(
             simulation_id=simulation.id,

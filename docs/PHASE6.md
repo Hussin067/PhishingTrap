@@ -146,7 +146,7 @@ Run scripts with `python -m ...` from the project root; running `python ai/xyz.p
 
 ## 10. Remaining limitations and next steps
 
-* **No authentication or authorization** on any endpoint (existing behaviour). Restrict `agent/execute` to administrators before real use; `approved_by` is currently a free-text label.
+* The agent/AI endpoints now require the admin token (see [ADMIN_PORTAL.md](ADMIN_PORTAL.md)); the rest of the pre-existing API (`/employees`, `/trainings`, ...) is still unauthenticated. `approved_by` on `agent/execute` is a free-text label.
 * Model is experimental, synthetic-only; blend weight, thresholds and smoothing constants are documented assumptions, not tuned values.
 * Difficulty does not yet change the email content.
 * Training content is a short built-in catalog (2 questions per scenario).

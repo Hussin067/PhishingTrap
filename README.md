@@ -56,3 +56,7 @@ $env:PYTHONPATH = ".;backend"
 uvicorn app.main:app --reload     # backend
 python -m pytest                  # tests
 ```
+
+## Admin portal
+
+Dashboard, employee weakness profiles and campaign runner at `/admin` (requires an admin account configured in `.env`). Setup and usage: [docs/ADMIN_PORTAL.md](docs/ADMIN_PORTAL.md).

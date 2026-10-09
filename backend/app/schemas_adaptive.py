@@ -160,3 +160,15 @@ class ModelStatusResponse(BaseModel):
     trained_at: str | None = None
     data_source: str | None = None
     note: str | None = None
+
+
+def decision_response(decision, employee_id: int, data_source: str) -> "AgentDecisionResponse":
+    """Build the API response from an ai.agent.AgentDecision dataclass."""
+    values = {
+        name: getattr(decision, name)
+        for name in AgentDecisionResponse.model_fields
+        if hasattr(decision, name)
+    }
+    return AgentDecisionResponse.model_validate(
+        {**values, "employee_id": employee_id, "data_source": data_source}
+    )

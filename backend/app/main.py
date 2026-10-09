@@ -26,8 +26,12 @@ app.add_middleware(
 )
 
 # Adaptive AI endpoints (behaviour analysis, prediction, agent).
+from backend.app.routers.adaptive import public_router as adaptive_public_router
 from backend.app.routers.adaptive import router as adaptive_router
+from backend.app.routers.admin import router as admin_router
 app.include_router(adaptive_router)
+app.include_router(adaptive_public_router)
+app.include_router(admin_router)
 
 
 @app.get("/")

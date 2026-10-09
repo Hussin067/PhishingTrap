@@ -21,7 +21,9 @@ from ai.prediction_service import (
     get_predictor,
 )
 from ai.vulnerability import analyze_scenarios
+from backend.app.admin_auth import require_admin
 from backend.app.schemas_adaptive import (
+    decision_response,
     AgentDecisionResponse,
     AuditEntry,
     ClickProbabilityResponse,
@@ -35,7 +37,10 @@ from backend.app.schemas_adaptive import (
 from backend.app.services import adaptive_service, behavior_service
 from database.connection import get_db
 
-router = APIRouter(tags=["adaptive-ai"])
+# Admin-only: behaviour analysis, predictions and agent actions.
+router = APIRouter(tags=["adaptive-ai"], dependencies=[Depends(require_admin)])
+# Employee-facing tracking (no admin token): recording that an email was reported.
+public_router = APIRouter(tags=["adaptive-ai"])
 
 DISCLAIMER = (
     "Estimates come from limited history and an experimental model trained on "
@@ -168,14 +173,7 @@ def agent_decision(
     except AgentValidationError as error:
         raise HTTPException(status_code=422, detail=str(error))
 
-    response = AgentDecisionResponse.model_validate(
-        {
-            **{name: getattr(decision, name) for name in AgentDecisionResponse.model_fields if hasattr(decision, name)},
-            "employee_id": employee_id,
-            "data_source": _data_source(request.include_synthetic),
-        }
-    )
-    return response
+    return decision_response(decision, employee_id, _data_source(request.include_synthetic))
 
 
 @router.post("/employees/{employee_id}/agent/execute", response_model=ExecuteResponse)
@@ -249,7 +247,7 @@ def agent_audit(
     return adaptive_service.get_audit_trail(db, employee_id, limit)
 
 
-@router.post("/simulations/{simulation_id}/report", response_model=ReportResponse)
+@public_router.post("/simulations/{simulation_id}/report", response_model=ReportResponse)
 def report_simulation(simulation_id: int, db: Session = Depends(get_db)):
     """Record that the employee reported the simulated phishing email."""
     result = adaptive_service.record_report(db, simulation_id)

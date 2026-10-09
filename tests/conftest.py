@@ -5,6 +5,12 @@ import os
 # database.connection is imported (load_dotenv does not override existing vars).
 os.environ["DATABASE_URL"] = "sqlite://"
 
+# Test-only admin credentials (never real ones).
+TEST_ADMIN_EMAIL = "admin@example.test"
+TEST_ADMIN_PASSWORD = "test-only-admin-password"
+os.environ["ADMIN_EMAIL"] = TEST_ADMIN_EMAIL
+os.environ["ADMIN_TOKEN_SECRET"] = "test-only-secret-" + "x" * 32
+
 import joblib
 import pandas as pd
 import pytest
@@ -17,7 +23,18 @@ from ai.model_config import FEATURES, TARGET, build_pipeline
 from ai.prediction_service import ClickPredictor, get_predictor
 from database import models
 from database.connection import Base, get_db
+from backend.app import admin_auth
+from backend.app.security import hash_password
 from tests.synthetic import training_rows
+
+os.environ["ADMIN_PASSWORD_HASH"] = hash_password(TEST_ADMIN_PASSWORD)
+
+
+@pytest.fixture(autouse=True)
+def reset_login_throttle():
+    admin_auth.login_throttle.reset("testclient")
+    yield
+    admin_auth.login_throttle.reset("testclient")
 
 
 @pytest.fixture(scope="session")
@@ -67,8 +84,7 @@ def db(session_factory):
     session.close()
 
 
-@pytest.fixture()
-def client(session_factory, predictor):
+def _make_client(session_factory, predictor, token=None):
     from backend.app.main import app
 
     def override_get_db():
@@ -80,7 +96,26 @@ def client(session_factory, predictor):
 
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_predictor] = lambda: predictor
-    yield TestClient(app)
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    return TestClient(app, headers=headers)
+
+
+@pytest.fixture()
+def anon_client(session_factory, predictor):
+    """Client WITHOUT an admin token."""
+    from backend.app.main import app
+
+    yield _make_client(session_factory, predictor)
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def client(session_factory, predictor):
+    """Client authenticated as the test admin."""
+    from backend.app.main import app
+
+    token, _ = admin_auth.create_token(TEST_ADMIN_EMAIL)
+    yield _make_client(session_factory, predictor, token)
     app.dependency_overrides.clear()
 
 
