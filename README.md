@@ -46,3 +46,13 @@ PhishingTrap/
 ├── tests/
 ├── .gitignore
 └── README.md
+
+## Phase 6 — Adaptive AI
+
+Behaviour analysis, an experimental click-prediction model and a guarded decision agent that proposes the next simulation and awareness training. See [docs/PHASE6.md](docs/PHASE6.md) for architecture, evaluation results, limitations, API endpoints and Windows run instructions.
+
+```powershell
+$env:PYTHONPATH = ".;backend"
+uvicorn app.main:app --reload     # backend
+python -m pytest                  # tests
+```

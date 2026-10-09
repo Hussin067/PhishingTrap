@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from database.connection import get_db
 import sqlalchemy
+from sqlalchemy import text
 from database import models
 from backend.app.templates.template_renderer import render_phishing_template
 from database.schemas import (TrainingQuestionCreate , TrainingQuestionResponse , TrainingSubmit , LoginRequest , LoginResponse)
@@ -23,6 +24,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Adaptive AI endpoints (behaviour analysis, prediction, agent).
+from backend.app.routers.adaptive import router as adaptive_router
+app.include_router(adaptive_router)
+
 
 @app.get("/")
 def root():

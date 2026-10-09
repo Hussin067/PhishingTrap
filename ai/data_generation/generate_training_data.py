@@ -7,7 +7,7 @@ from database.models import Employee, Campaign, Simulation, Event
 
 CAMPAIGN_NAME = "ML Synthetic Training Dataset v1"
 
-SIMULATIONS_PER_EMPLOYEE = 50
+SIMULATIONS_PER_EMPLOYEE = 200
 
 RANDOM_SEED = 42
 
@@ -171,14 +171,21 @@ EMPLOYEE_PROFILES = {
 
 def generate_phishing_types():
 
-    scenarios = PHISHING_TYPES * 4
-
-    extra_scenarios = random.sample(
-        PHISHING_TYPES,
-        2,
+    # Whole cycles of all 12 scenarios, then a random remainder, so the
+    # list always has exactly SIMULATIONS_PER_EMPLOYEE items.
+    full_cycles, remainder = divmod(
+        SIMULATIONS_PER_EMPLOYEE,
+        len(PHISHING_TYPES),
     )
 
-    scenarios.extend(extra_scenarios)
+    scenarios = PHISHING_TYPES * full_cycles
+
+    scenarios.extend(
+        random.sample(
+            PHISHING_TYPES,
+            remainder,
+        )
+    )
 
     random.shuffle(scenarios)
 
