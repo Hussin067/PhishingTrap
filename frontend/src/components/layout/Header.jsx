@@ -4,11 +4,10 @@ const Header = ({ employeeName = "Employee", avatarUrl = "" }) => {
   const initial = employeeName?.trim()?.charAt(0)?.toUpperCase() || "U";
 
   return (
-    <header className="w-full h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8">
-      
+    <header className="sticky top-0 z-30 w-full h-16 bg-ink-950/90 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      {/* Brand logo & title */}
       <div className="flex items-center gap-3 min-w-0">
-        
-        <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center">
+        <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-glow-brand">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -24,35 +23,37 @@ const Header = ({ employeeName = "Employee", avatarUrl = "" }) => {
           </svg>
         </div>
 
-        
         <div className="flex flex-col leading-tight min-w-0">
-          <span className="text-base sm:text-lg font-semibold text-slate-900 truncate">
+          <span className="text-base sm:text-lg font-bold text-gradient font-heading truncate">
             Phishing Trap AI
           </span>
-          <span className="text-xs text-slate-500 truncate">
+          <span className="text-xs text-ink-300 truncate">
             Employee Portal
           </span>
         </div>
       </div>
 
-      
+      {/* User profile */}
       <div className="flex items-center gap-3 min-w-0">
-        <span className="hidden sm:block text-sm font-medium text-slate-700 truncate max-w-[160px]">
+        <span className="hidden sm:block text-sm font-medium text-ink-200 truncate max-w-[160px]">
           {employeeName}
         </span>
 
-        
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={employeeName}
-            className="w-9 h-9 rounded-full object-cover border border-slate-200 flex-shrink-0"
-          />
-        ) : (
-          <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600 flex-shrink-0">
-            {initial}
-          </div>
-        )}
+        <div className="relative">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={employeeName}
+              className="w-9 h-9 rounded-full object-cover ring-2 ring-brand-500/40 flex-shrink-0"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-ink-700 ring-2 ring-brand-500/30 flex items-center justify-center text-sm font-semibold text-brand-300 flex-shrink-0">
+              {initial}
+            </div>
+          )}
+          {/* Active online dot */}
+          <span className="absolute -bottom-0.5 -right-0.5 block h-2.5 w-2.5 rounded-full bg-success-500 ring-2 ring-ink-950" />
+        </div>
       </div>
     </header>
   );

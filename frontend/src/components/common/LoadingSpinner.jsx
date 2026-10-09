@@ -18,34 +18,43 @@ const LoadingSpinner = ({ message, size = 32, fullScreen = false }) => {
     <div
       role="status"
       aria-live="polite"
-      className={`flex flex-col items-center justify-center gap-3 ${
+      className={`flex flex-col items-center justify-center gap-4 ${
         fullScreen ? "min-h-screen" : "py-12"
       }`}
     >
-      <svg
-        className="animate-spin text-blue-600"
-        style={{ width: size, height: size }}
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-20"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
+      <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+        {/* Subtle background track */}
+        <div
+          className="absolute inset-0 rounded-full border-2 border-brand-200/50"
         />
-        <path
-          className="opacity-90"
-          fill="currentColor"
-          d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"
-        />
-      </svg>
+        {/* Animated gradient spinner */}
+        <svg
+          className="animate-spin"
+          style={{ width: size, height: size }}
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <defs>
+            <linearGradient id="cyberSpinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#6366F1" />
+              <stop offset="100%" stopColor="#22D3EE" />
+            </linearGradient>
+          </defs>
+          <circle
+            cx="12"
+            cy="12"
+            r="9.5"
+            stroke="url(#cyberSpinGrad)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeDasharray="42 20"
+            fill="none"
+          />
+        </svg>
+      </div>
 
       {message && (
-        <p className="text-sm font-medium text-slate-500">{message}</p>
+        <p className="text-sm font-medium text-ink-400 animate-pulse tracking-wide">{message}</p>
       )}
 
       <span className="sr-only">{message || "Loading"}</span>

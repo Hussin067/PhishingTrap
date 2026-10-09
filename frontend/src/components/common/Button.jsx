@@ -1,17 +1,15 @@
 import React from "react";
 
-
 const VARIANT_STYLES = {
   primary:
-    "bg-blue-600 text-white border border-transparent hover:bg-blue-700 focus-visible:ring-blue-500",
+    "btn-glow text-white border border-transparent focus-visible:ring-brand-500",
   secondary:
-    "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus-visible:ring-blue-500",
+    "bg-white/90 backdrop-blur-sm text-ink-800 border border-ink-100 hover:bg-white hover:border-ink-200 shadow-soft focus-visible:ring-brand-500",
   danger:
-    "bg-red-600 text-white border border-transparent hover:bg-red-700 focus-visible:ring-red-500",
+    "bg-gradient-to-r from-danger-600 to-danger-500 text-white border border-transparent hover:from-danger-500 hover:to-danger-600 shadow-glow-danger focus-visible:ring-danger-500",
   ghost:
-    "bg-transparent text-slate-600 border border-transparent hover:bg-slate-100 focus-visible:ring-blue-500",
+    "bg-transparent text-ink-600 border border-transparent hover:bg-ink-50 hover:text-ink-900 focus-visible:ring-brand-500",
 };
-
 
 const Spinner = () => (
   <svg
@@ -26,16 +24,15 @@ const Spinner = () => (
       cy="12"
       r="10"
       stroke="currentColor"
-      strokeWidth="4"
+      strokeWidth="3.5"
     />
     <path
-      className="opacity-75"
+      className="opacity-90"
       fill="currentColor"
       d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"
     />
   </svg>
 );
-
 
 const Button = ({
   variant = "primary",
@@ -56,10 +53,11 @@ const Button = ({
       onClick={onClick}
       disabled={isDisabled}
       aria-busy={loading || undefined}
-      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium
-        transition-colors duration-150
+      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium
+        transition-all duration-200
         focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-        disabled:opacity-50 disabled:cursor-not-allowed
+        disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none
+        active:scale-95 cursor-pointer
         ${variantClasses} ${className}`}
       {...rest}
     >

@@ -6,8 +6,6 @@ import ScoreCircle from "../components/results/ScoreCircle";
 import ResultActions from "../components/results/ResultActions";
 import { useNavigate , useLocation } from "react-router-dom";
 
-
-
 const Results = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,15 +30,18 @@ const Results = () => {
   const handleLogout = () => {};
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50">
+    <div className="h-screen flex flex-col page-bg">
       <Header employeeName="Ahmed" />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar activeItem={activeItem} onLogout={handleLogout} />
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-md mx-auto flex flex-col items-center gap-6">
-            <ScoreCircle score={scorePercentage} size={160} label="Score" />
+          <div className="max-w-lg mx-auto flex flex-col items-center gap-7 py-6 sm:py-10">
+            {/* Ambient background glow */}
+            <div className="relative">
+              <ScoreCircle score={scorePercentage} size={164} label="Score" />
+            </div>
 
             <ResultSummary
               scorePercentage={scorePercentage}

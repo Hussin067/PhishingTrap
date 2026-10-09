@@ -92,23 +92,33 @@ const icons = {
   ),
 };
 
-const NavItem = ({ label, icon, active = false, onClick }) => {
+const NavItem = ({ label, icon, active = false, onClick, isDanger = false }) => {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-current={active ? "page" : undefined}
-      className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+      className={`group relative w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
         ${
-          active
-            ? "bg-blue-50 text-blue-600"
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+          isDanger
+            ? "text-ink-300 hover:bg-danger-500/10 hover:text-danger-400"
+            : active
+            ? "bg-brand-500/15 text-white shadow-soft"
+            : "text-ink-300 hover:bg-white/5 hover:text-white"
         }`}
     >
       {active && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-blue-600" />
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-gradient-to-b from-brand-400 to-accent-400 shadow-glow-brand" />
       )}
-      <span className={active ? "text-blue-600" : "text-slate-400"}>
+      <span
+        className={`transition-transform duration-200 group-hover:scale-110 ${
+          isDanger
+            ? "text-ink-400 group-hover:text-danger-400"
+            : active
+            ? "text-brand-400"
+            : "text-ink-400 group-hover:text-ink-200"
+        }`}
+      >
         {icon}
       </span>
       <span className="truncate">{label}</span>
@@ -158,8 +168,8 @@ const Sidebar = ({
   };
 
   const SidebarContent = (
-    <div className="flex flex-col h-full bg-white">
-      <nav className="flex-1 px-3 py-4 space-y-1">
+    <div className="flex flex-col h-full bg-ink-950 border-r border-white/5">
+      <nav className="flex-1 px-3 py-5 space-y-1.5">
         {navItems.map((item) => (
           <NavItem
             key={item.key}
@@ -171,12 +181,13 @@ const Sidebar = ({
         ))}
       </nav>
 
-      <div className="px-3 py-4 border-t border-slate-200">
+      <div className="px-3 py-4 border-t border-white/5">
         <NavItem
           label="Logout"
           icon={icons.logout}
           active={false}
           onClick={handleLogout}
+          isDanger
         />
       </div>
     </div>
@@ -184,34 +195,40 @@ const Sidebar = ({
 
   return (
     <>
-      <div className="lg:hidden flex items-center justify-between h-14 px-4 bg-white border-b border-slate-200">
+      {/* Mobile top trigger bar */}
+      <div className="lg:hidden flex items-center justify-between h-14 px-4 bg-ink-950 border-b border-white/5">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="text-slate-600 hover:text-slate-900"
+          className="p-1 rounded-lg text-ink-300 hover:text-white hover:bg-white/5 transition-colors"
           aria-label="Open navigation menu"
         >
           {icons.menu}
         </button>
       </div>
 
-      <aside className="hidden lg:flex lg:flex-col w-60 h-screen bg-white border-r border-slate-200 flex-shrink-0">
+      {/* Desktop static sidebar */}
+      <aside className="hidden lg:flex lg:flex-col w-60 h-screen bg-ink-950 border-r border-white/5 flex-shrink-0">
         {SidebarContent}
       </aside>
 
+      {/* Mobile slide-in drawer */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-40">
           <div
-            className="absolute inset-0 bg-slate-900/40"
+            className="absolute inset-0 bg-ink-950/70 backdrop-blur-sm animate-fade-in"
             onClick={() => setMobileOpen(false)}
           />
 
-          <div className="absolute left-0 top-0 h-full w-60 bg-white border-r border-slate-200 shadow-lg flex flex-col">
-            <div className="flex items-center justify-end px-3 h-14 border-b border-slate-200">
+          <div className="absolute left-0 top-0 h-full w-64 bg-ink-950 border-r border-white/10 shadow-elevated flex flex-col animate-slide-in-left">
+            <div className="flex items-center justify-between px-4 h-14 border-b border-white/5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-ink-400">
+                Menu
+              </span>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="text-slate-500 hover:text-slate-900"
+                className="p-1 rounded-lg text-ink-400 hover:text-white hover:bg-white/5 transition-colors"
                 aria-label="Close navigation menu"
               >
                 {icons.close}
